@@ -137,6 +137,7 @@ streamlit run streamlit_app/app.py
 A separate `model_playground` branch includes an experimental model upload feature for testing alternative models. This functionality is intentionally excluded from the main deployment to maintain production stability.
 
 **Branch:** `model_playground`
+
 **Feature:** Manual `.pkl` file upload via Streamlit UI
 
 ---
@@ -276,7 +277,8 @@ For technical inquiries or collaboration:
 
 **Developer:** Jamiya Begam K
 **Email:** jamiyabegamk@gmail.com
-**LinkedIn:** [linkedin.com/in/yourprofile](https://www.linkedin.com/in/jamii17/)
+
+**LinkedIn:** [jamii17](https://www.linkedin.com/in/jamii17/)
 
 ---
 
