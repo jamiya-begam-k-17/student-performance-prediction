@@ -1,21 +1,8 @@
-# model loading
-pickle-mixin
-
-# Core Framework
-streamlit==1.28.0
-
-# Data Processing
-pandas==2.0.3
-numpy==1.24.3
-
-# Machine Learning (for model loading and prediction)
-scikit-learn==1.3.0
-xgboost==2.0.0
-lightgbm==4.1.0
-catboost==1.2
-
-# Visualization
-plotly==5.17.0
-
-# Utilities
-pathlib2==2.3.7.post1
+streamlit
+pandas
+numpy
+scikit-learn
+xgboost
+lightgbm
+catboost
+plotly
