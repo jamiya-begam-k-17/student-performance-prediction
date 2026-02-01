@@ -6,6 +6,19 @@ import plotly.graph_objects as go
 from pathlib import Path
 import time
 
+
+
+# ================================================
+# Load model
+# =================================================
+@st.cache_resource
+def load_model():
+    with open("model.pkl", "rb") as f:
+        return pickle.load(f)
+
+model = load_model()
+
+
 # ============================================================================
 # PAGE CONFIGURATION
 # ============================================================================
@@ -163,14 +176,6 @@ def load_css():
         box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
     }
     
-    /* File Uploader */
-    [data-testid="stFileUploader"] {
-        background: #283843;
-        border: 2px dashed #cbd5e0;
-        border-radius: 10px;
-        padding: 1rem;
-    }
-    
     /* Hide Streamlit Branding */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
@@ -270,25 +275,6 @@ def preprocess_input(data, model=None):
     
     return df
 
-def load_model(model_path: str):
-    """
-    Load pickled ensemble model
-    
-    Args:
-        model_path: Path to the .pkl model file
-    
-    Returns:
-        Loaded model object or None
-    """
-    try:
-        with open(model_path, "rb") as f:
-            return pickle.load(f)
-    except FileNotFoundError:
-        st.error("Model file not found ❌. Please upload your trained model.")
-        return None
-    except Exception as e:
-        st.error(f"Failed to load model ❌: {str(e)}")
-        return None
 
 def get_performance_category(score):
     """Get performance category and color based on score"""
@@ -407,28 +393,6 @@ with st.sidebar:
     
     st.markdown("---")
     
-    # Model Upload
-    st.markdown("## 📤 Upload Model")
-    uploaded_model = st.file_uploader(
-        "Upload trained ensemble model (.pkl)",
-        type=["pkl"],
-        help="Upload your trained pickle model file"
-    )
-    
-    if uploaded_model and not st.session_state.model_loaded:
-        with st.spinner("Loading model..."):
-            with open("model.pkl", "wb") as f:
-                f.write(uploaded_model.read())
-            time.sleep(0.5)
-        st.session_state.model_loaded = True
-        st.success("✅ Model loaded successfully!")
-        st.rerun()
-    
-    if st.session_state.model_loaded:
-        st.success("✅ Model ready for predictions")
-    
-    st.markdown("---")
-    
     # Technical Details
     with st.expander("Technical Details"):
         st.markdown("""
@@ -466,13 +430,8 @@ st.title("Student Performance Prediction")
 st.markdown("Enter student information to predict exam score using ensemble ML models")
 st.markdown("---")
 
-# Check if model is loaded
-if not st.session_state.model_loaded:
-    st.warning("⚠️ Please upload a trained model from the sidebar to start making predictions.")
-    st.stop()
-
 # Prediction Form
-st.markdown("##Student Information")
+st.markdown("## Student Information")
 
 with st.form("prediction_form"):
     # Section 1: Demographics
@@ -585,8 +544,6 @@ with st.form("prediction_form"):
             # Load and predict
             model_path = "model.pkl"
             if Path(model_path).exists():
-                model = load_model(model_path)
-                
                 if model:
                     with st.spinner('🔮 Generating prediction...'):
                         time.sleep(0.8)
