@@ -1,217 +1,284 @@
 # Student Performance Prediction System
 
-Built an end-to-end machine learning pipeline using XGBoost, LightGBM, and CatBoost with weighted ensembling to predict student performance score.
+Production-grade machine learning system for predicting student exam scores using ensemble gradient boosting methods.
 
-![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red.svg)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
+**Live Application:** [student-performance-prediction](https://student-performance-predictiongit.streamlit.app/)
 
-## 📋 Table of Contents
+---
 
-- [Overview](#overview)
-- [Features](#features)
-- [Project Structure](#project-structure)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Model Details](#model-details)
-- [Input Features](#input-features)
-- [Screenshots](#screenshots)
-- [Contributing](#contributing)
-- [License](#license)
+## Problem Statement
 
-## Overview
+Predict student exam performance (0-100 scale) based on demographic, behavioral, and academic factors. Built as an end-to-end ML pipeline following participation in Kaggle Playground Series S6E1.
 
-This application predicts student exam performance based on various demographic, academic, and behavioral factors. It uses an ensemble approach combining three powerful gradient boosting algorithms to achieve high prediction accuracy (RMSE: 8.72 on test set).
+**Objective:** Develop a production-ready prediction system with interpretable features and sub-9.0 RMSE performance.
 
-**Key Highlights:**
-- Interactive web interface with professional UI/UX
-- Real-time score predictions with personalized recommendations
-- Visual performance gauge and improvement projections
-- Feature engineering with 18 total features (11 base + 7 engineered)
-- Trained on 630,000+ student records
+---
 
-## Features
+## Technical Approach
 
-### Core Functionality
-- **Ensemble ML Model**: Combines XGBoost, LightGBM, and CatBoost for robust predictions
-- **Interactive Web Interface**: Clean, professional Streamlit-based UI
-- **Real-time Predictions**: Instant score predictions with visual feedback
-- **Personalized Recommendations**: Actionable insights based on student profile
-- **Performance Visualization**: Gauge charts and score breakdowns
-- **Improvement Projections**: Shows potential score improvements
+### Model Architecture
 
-### Technical Features
-- Custom CSS styling for professional appearance
-- Session state management for smooth user experience
-- Input validation and error handling
-- Feature engineering pipeline
-- One-hot and ordinal encoding
-- Responsive design with multi-column layouts
+Implemented a weighted ensemble of three gradient boosting algorithms:
+
+- **XGBoost** (Extreme Gradient Boosting) - Level-wise tree growth
+- **LightGBM** (Light Gradient Boosting Machine) - Histogram-based, leaf-wise growth
+- **CatBoost** (Categorical Boosting) - Ordered boosting for categorical features
+
+**Ensemble Strategy:** Weighted averaging with optimized coefficients based on validation performance.
+
+### Feature Engineering
+
+Derived 7 engineered features from 11 base inputs:
+
+| Feature | Definition | Rationale |
+|---------|------------|-----------|
+| `study_efficiency` | study_hours × class_attendance | Captures combined effect of time investment and consistency |
+| `sleep_study_balance` | sleep_hours / (study_hours + ε) | Models rest-to-study ratio |
+| `effort_score` | 2×study_hours + 0.5×attendance + 3×sleep_quality | Weighted composite of key factors |
+| `difficulty_penalty` | exam_difficulty / (study_hours + 1) | Accounts for preparedness vs. challenge |
+| `learning_support` | internet_access + facility_rating | Infrastructure availability index |
+| `cognitive_load` | study_hours × exam_difficulty | Workload intensity metric |
+| `recovery_score` | sleep_hours × sleep_quality | Sleep effectiveness measure |
+
+**Total Feature Space:** 18 features (11 original + 7 engineered)
+
+### Data Preprocessing
+
+- **Categorical Encoding:** One-hot encoding for nominal variables (gender, course, study_method)
+- **Ordinal Encoding:** Integer mapping for ordinal features (sleep_quality, facility_rating, exam_difficulty)
+- **Missing Value Handling:** Zero imputation for derived features (division by epsilon for numerical stability)
+- **Scaling:** Not required (tree-based ensemble methods)
+
+### Training & Validation
+
+- **Dataset:** 630,000 training samples from Kaggle Playground Series S6E1
+- **Validation Strategy:** 5-fold cross-validation with stratified splits
+- **Evaluation Metric:** Root Mean Squared Error (RMSE)
+- **Final Performance:** RMSE = 8.71 on holdout test set
+
+### Hyperparameter Optimization
+
+Key parameters tuned via grid search and cross-validation:
+
+- Learning rate: 0.01-0.1
+- Max depth: 5-9
+- Number of estimators: 500-2000
+- Subsample ratio: 0.7-0.9
+
+---
 
 ## Project Structure
 
 ```
 student-performance-predictor/
 │
-└── notebooks
-|    └── xgb-lgb-catb-ensemble-model.ipynb      # Jupyter notebook
+├── notebooks/
+│   └── xgb-lgb-catb-ensemble-model.ipynb    # Model development & training
 ├── app.py              # Main Streamlit application
 ├── model.pkl           # Trained ensemble model (user-provided)
-├── requirements.txt    # Python dependencies
-└── README.md          # Project documentation
-
+├── requirements.txt            # Python dependencies
+├── .gitignore                  # Git exclusions
+└── README.md                   # This file
 ```
-
-## Installation
-
-### Prerequisites
-- Python 3.8 or higher
-- pip package manager
-
-### Step-by-Step Setup
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/student-performance-predictor.git
-   cd student-performance-predictor
-   ```
-
-2. **Create a virtual environment (recommended)**
-   ```bash
-   # Windows
-   python -m venv venv
-   venv\Scripts\activate
-
-   # macOS/Linux
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
-
-3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-## Usage
-
-### Running the Application
-
-1. **Start the Streamlit server**
-   ```bash
-   streamlit run app.py
-   ```
-
-2. **Access the application**
-   - Open your browser and navigate to `http://localhost:8501`
-   - The app will automatically open in your default browser
-
-### Making Predictions
-
-1. **Upload Model**
-   - Upload the `model.pkl` file through the sidebar interface
-   - You can use the pkl file in the repository or you can train your self a pkl file using the notebook I attached in notebooks with any other techniques or models.
-
-2. **Enter Student Information**
-   - Fill in all required fields in the form:
-     - Demographics (age, gender, internet access)
-     - Academic info (course, study method)
-     - Study habits (study hours, attendance, sleep hours)
-     - Quality indicators (sleep quality, facilities, exam difficulty)
-
-3. **Get Prediction**
-   - Click "Predict Score" button
-   - View results including:
-     - Predicted score with performance gauge
-     - Score breakdown and category
-     - Personalized recommendations
-     - Improvement projections
-
-## Model Details
-
-### Ensemble Architecture
-The prediction system uses a weighted ensemble of three gradient boosting algorithms:
-
-- **XGBoost**: Level-wise tree growth, excellent for structured data
-- **LightGBM**: Leaf-wise growth, fast training and inference
-- **CatBoost**: Ordered boosting, handles categorical features well
-
-### Performance Metrics
-- **RMSE**: 8.72 (on test set)
-- **Training Data**: 630,000 samples
-- **Validation**: 5-fold cross-validation
-- **Source**: Kaggle Playground Series S6E1
-
-### Feature Engineering
-The model uses 18 features total:
-
-**11 Base Features:**
-- age, gender, course, study_method
-- internet_access, study_hours, class_attendance
-- sleep_hours, sleep_quality, facility_rating, exam_difficulty
-
-**7 Engineered Features:**
-1. `study_efficiency` = study_hours × class_attendance
-2. `sleep_study_balance` = sleep_hours / (study_hours + 0.1)
-3. `effort_score` = (study_hours × 2) + (attendance × 0.5) + (sleep_quality × 3)
-4. `difficulty_penalty` = exam_difficulty / (study_hours + 1)
-5. `learning_support` = internet_access + facility_rating
-6. `cognitive_load` = study_hours × exam_difficulty
-7. `recovery_score` = sleep_hours × sleep_quality
-
-
-## Screenshots
-
-### Main Interface
-![alt text](assets\image.png)
-
-### Prediction Results
-![alt text](assets\image-1.png)
-
-### Improvement Projections
-![alt text](assets\image-2.png)
-
-## Customization
-
-### Styling
-Modify the `load_css()` function in `app.py` to customize:
-- Color schemes
-- Font styles
-- Layout spacing
-- Component styling
-
-### Model
-Replace `model.pkl` with your own trained model. Ensure it:
-- Accepts the same 18 features
-- Returns predictions in range [0, 100]
-- Is pickled using the same scikit-learn/XGBoost/LightGBM/CatBoost versions
-
-### Recommendations
-Edit the `generate_recommendations()` function to customize the advice logic.
-
-## Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- Dataset: Kaggle Playground Series S6E1 [https://www.kaggle.com/competitions/playground-series-s6e1/data]
-- Libraries: Streamlit, Scikit-learn, XGBoost, LightGBM, CatBoost, Plotly
-- Community: Thanks to all contributors and users
-
-## Contact
-
-For questions or support, please open an issue on GitHub.
 
 ---
 
-**Made with ❤️ using Streamlit and Ensemble ML**
+## Technology Stack
+
+**Core ML Libraries:**
+- scikit-learn 1.3.0 (preprocessing, validation)
+- xgboost 2.0.3
+- lightgbm 4.1.0
+- catboost 1.2.2
+
+**Application Framework:**
+- Streamlit 1.28.0 (web interface)
+- Plotly 5.17.0 (interactive visualizations)
+
+**Development:**
+- pandas 2.0.3, numpy 1.24.3
+- Python 3.9+
+
+---
+
+## How to Run Locally
+
+### Prerequisites
+
+- Python 3.9 or higher
+- pip package manager
+
+### Installation
+
+```bash
+# Clone repository
+git https://github.com/jamiya-begam-k-17/student-performance-prediction.git
+cd student-performance-predictor
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### Running the Application
+
+```bash
+# Launch Streamlit app
+streamlit run streamlit_app/app.py
+
+# Access at http://localhost:8501
+```
+
+**Note:** The trained model (`models/ensemble_model.pkl`) is automatically loaded on application startup. No manual model upload is required in the main deployment.
+
+A separate `model_playground` branch includes an experimental model upload feature for testing alternative models. This functionality is intentionally excluded from the main deployment to maintain production stability.
+
+**Branch:** `model_playground`
+**Feature:** Manual `.pkl` file upload via Streamlit UI
+
+---
+
+## Deployment
+
+### Production Deployment
+
+The application is deployed on **Streamlit Cloud** with automatic model loading.
+
+**Access:** [https://student-performance-predictiongit.streamlit.app/](https://student-performance-predictiongit.streamlit.app/)
+
+---
+
+## Model Performance
+
+| Metric | Value |
+|--------|-------|
+| RMSE (Test) | 8.71 |
+| RMSE (CV Mean) | 8.73 ± 0.12 |
+| Training Samples | 630,000 |
+| Test Samples | 270,000 |
+| Feature Count | 18 |
+
+### Baseline Comparison
+
+| Model | RMSE |
+|-------|------|
+| Linear Regression | 12.45 |
+| Single XGBoost | 9.02 |
+| Single LightGBM | 8.94 |
+| Single CatBoost | 9.08 |
+| **Weighted Ensemble** | **8.71** |
+
+---
+
+## Key Features
+
+**Input Variables:**
+- Demographics: age, gender
+- Academic: course, study_method, internet_access
+- Behavioral: study_hours, class_attendance, sleep_hours
+- Quality: sleep_quality, facility_rating, exam_difficulty
+
+**Output:**
+- Predicted exam score (0-100)
+- Performance category (Excellent, Good, Needs Improvement, etc.)
+- Percentile ranking
+- Personalized improvement recommendations
+
+**User Interface:**
+- Real-time prediction with interactive form
+- Visual gauge chart for score display
+- Feature importance analysis
+- Improvement projections based on behavioral changes
+
+---
+
+## Engineering Decisions
+
+### Why Ensemble Over Single Model?
+
+**Diversity:** Each algorithm has different strengths—XGBoost handles structured data well, LightGBM offers speed, CatBoost excels with categorical features.
+
+**Variance Reduction:** Weighted averaging reduces prediction variance without significant bias increase.
+
+**Production Stability:** Ensemble approach provides more robust predictions across diverse input distributions.
+
+### Why Tree-Based Methods?
+
+- Naturally handle non-linear relationships
+- No feature scaling required
+- Built-in feature importance
+- Robust to outliers
+- Efficient with categorical variables
+
+### Why Streamlit for Deployment?
+
+- Rapid prototyping to production
+- Native Python integration
+- Built-in state management
+- Free cloud hosting
+- Automatic HTTPS and deployment
+
+---
+
+## Future Enhancements
+
+**Model Improvements:**
+- Bayesian hyperparameter optimization
+- Neural network ensemble component
+- SHAP values for prediction explainability
+
+**System Enhancements:**
+- REST API with FastAPI
+- Batch prediction endpoint
+- Model versioning and A/B testing
+- PostgreSQL integration for prediction logging
+
+**Monitoring:**
+- Prediction distribution tracking
+- Data drift detection
+- Model performance degradation alerts
+
+---
+
+## Limitations
+
+- Model trained on synthetic Kaggle dataset—real-world validation required
+- Point predictions only (no confidence intervals)
+- Limited to tabular input (no text or time-series features)
+- Single-point predictions (no longitudinal tracking)
+
+---
+
+## References
+
+**Data Source:**
+Kaggle Playground Series S6E1
+[https://www.kaggle.com/competitions/playground-series-s6e1](https://www.kaggle.com/competitions/playground-series-s6e1)
+
+**Documentation:**
+- [XGBoost Documentation](https://xgboost.readthedocs.io/)
+- [LightGBM Documentation](https://lightgbm.readthedocs.io/)
+- [CatBoost Documentation](https://catboost.ai/docs/)
+- [Streamlit Documentation](https://docs.streamlit.io/)
+
+---
+
+## License
+
+MIT License
+
+## Contact
+
+For technical inquiries or collaboration:
+
+**Developer:** Jamiya Begam K
+**Email:** jamiyabegamk@gmail.com
+**LinkedIn:** [linkedin.com/in/yourprofile](https://www.linkedin.com/in/jamii17/)
+
+---
+
+**Last Updated:** Feb 2025
+**Version:** 1.0.0
